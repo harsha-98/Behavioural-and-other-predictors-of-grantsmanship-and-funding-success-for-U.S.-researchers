@@ -1,0 +1,809 @@
+---
+title: "Milestone-3"
+author: "Prananditha M,Harshika A"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+**Milestone-3**
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+library("dplyr")
+library("lme4")
+library("forcats")
+library("olsrr")
+library("logistf")
+library("ciTools")
+library("jtools")
+library("ggplot2")
+library("scales")
+library("ggpubr")
+library("cowplot")
+library("ggplotify")
+library("patchwork")
+library("gridExtra")
+```
+
+The main aim of this project is to examine the behavior of Researchers who were successful in getting a Grantsmanship and funding for their research. we have taken into account a number of Characteristics of the researchers, especially academic grant proposal tactics, Scholarly profiles, and personality traits.\
+
+Before proceeding to apply a model to the data, we have done a few Transformations, it mainly involves factorizing the Categorical data.\
+
+**Number of Proposals(Np):** They are divided into three levels, NP~1~(1-2 proposals per year), NP~2~(3-4 proposals per year), and NP~3~(5 or more proposals per year). all the levels were represented as 1,2 and 3 in the dataset which I have changed to the above terms.\
+
+**Funding Agency(FA):** Different funding agencies are represented as numbers from 1 to 5 which I have changed to the Agencies acronym. NSF(National Science Foundation), NIH(National Institutes of Health), DOE(Department of Energy), DOD(Department of Defense), NASA(National Aeronautics and Space Administration), and OT for the rest other Agencies.\
+
+**Break Frequency(BF):** Break Frequency is represented as 1 for (break every 1-2 hours or less) which I have changed to BF~1~ and 2(break every 3-4 hours or longer) to BF~2~.\
+
+**Pilot Research(PR):** These levels are taken as numbers from 1 to 5 in the dataset which I have changed to PR~1~(Time dedicated to Pilot Research is less than 1 month), PR~2~ (1-3 months), PR~3~ (3-6 months), PR~4~(6-12 months), PR~5~(more than 12 months).\
+
+**Time of Submission(TS):** changed to TS~1~ (Submission on the deadline day) which was 1 in the dataset and TS~2~ (Submission earlier than the deadline) which was 2.\
+
+**Deadline Stress(DS):** DS~1~(Similar or lesser stress than a regular day) and DS~2~(more stress than a regular day). they were represented as 1 and 2 in the dataset.\
+
+**Research Style(RS):**RS~1~(hands-off) and RS~2~(hands-on) were given as 1 and 2.\
+
+
+Before Achieving the optimized model. we have done forward, backward, and mixed selection methods to select the optimal predictors. Based on the AIC and the number of predictors an Optimal model was chosen this process is explained in detail at the end of the report in the Appendix section of the report.\
+
+**Grantsmanship Analysis:**\
+We have used Logit models 2 and 3 for this analysis. The data is divided into two categories First,**Successful Grantsmanship(S^G30^)**, in which a more permissive definition of grantsmanship is employed. Researchers who estimated their success rate to be equal to or greater than 30% belong to the most successful class S~1~^G30^ and the rest belong to the least successful class S~0~^G30^. Second,**Highly Successful Grantsmanship(S^G50^)**, where a stricter success definition is considered that is, respondents who estimate their success rate to be lower than 50% belong to the S~0~^G50^ class and rest in S~1~^G50^.\
+
+All of the Interpretation that was done is by taking a reference researcher who belongs to the S~1~^G30^ class who submits 1-2 Proposals per year(NP~1~), mostly to NSF and experiences no higher stress than any regular working day. These values are taken using baseline and mean values of predictors.\
+
+**Comparison Between S~1~^SG30^ and S~0~^SG30^**\
+Looking at Figure-2a Research Tactics plot, we can see that as the number of Proposals increases the faculty's ability to belong to the most Successful Group Decreases. The probability of group Np2 and Group NP3 belonging to the S~1~^SG30^ Group drops by 25.4% and 42.9% respectively With respect to the reference researcher RR^G30^ with a p-value of 0.001. This might be happening because the more and more Proposals one come-up with every year, there might be a decrease in the quality of the proposal which will reduce your Probability of successful Grantsmanship. Furthermore, The Funding Agencies NIH, DOE, and NASA are around the same probability as the RR^G30^ but OT and DOD have a 28.9% and 26.4% higher probability than the Reference Researcher to belong to the most successful group.\
+
+if we observe Figure 2b, The Faculty who has an h-index greater than one standard deviation above the mean the probability of the researcher belonging to S~1~^SG30^ increases by 7.9%.So, we can say that the Popularity of the faculty will also play a major role in Successful Grantsmanship. An opposite trend is followed for Trait Anxiety where there will be a probability drop of 7.8%  with respect to RR^G30^ of the faculty who has a Trait Anxiety greater than one Standard deviation above the mean which can be seen in Figure 2c.\
+
+Lastly, Faculty who experience higher stress than on the regular days(DS~2~) on the day of the deadline have a 17.5% lower probability of belonging to S~1~^SG30^ with a higher significance of p<0.01.\
+
+both from trait anxiety and Deadline Stress Observation, we can say that stressing will not help in Grantsmanship.\
+
+**Comparison Between S~1~^G50^ and S~0~^G50^**\
+The Reference Researcher for this group RR^G50^ has the same traits as RR^G30^ but RR^G50^ has additional traits such as Extraversion (6.0) and Trait Anxiety(18.8).\
+
+The same trend as S~1~^G30^ follows here, with the increase in the number of Proposals, the probability of the faculty belonging to the most successful class S~1~^G50^ Decreases. With respect to the RR^G50^, NP~2~ group has 25.4% and NP~3~ has a 42.7% Probability drop for belonging to the most successful group. The Funding Agencies DOD and OT Groups have a 26.4% and 31.0% higher probability than the RR^G50^ to belong to S~1~^G50^. The rest Groups have the similar Probability as RR^G50^.\
+
+Next, The faculty who doesn't take frequent breaks while working(BF~2~) has an 18.1% higher probability to belong to S~1~^G50^.this might be because frequent breaks might bring in more distraction. Contrary to what we believe, Researcher who had performed a high amount of pilot research has less probability to belong to the most Successful Group with p<0.05. The worst case is PR~3~ with a 36.4% probability drop, which might mean that 3-4 months of work on new Research is not a good enough amount of time for a successful Grantsmanship.\
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=TRUE}
+setwd('C:/Users/mpran/OneDrive/Desktop/UH_Sem2/STAT/Project/')
+Original_data_key<- read.csv("KeyData.csv")
+Original_data_key$NP<-ifelse(Original_data_key$NP==1 , "NP1",
+                ifelse(Original_data_key$NP==2, "NP2","NP3"))
+
+
+Original_data_key$FA<-ifelse(Original_data_key$FA==1,"NSF",
+                ifelse(Original_data_key$FA==2,"NIH",
+                       ifelse(Original_data_key$FA==3,"DOE",
+                              ifelse(Original_data_key$FA==4,"DOD",
+                                     ifelse(Original_data_key$FA==5,"NASA",
+                                            "OT")))))
+Original_data_key$BF<-ifelse(Original_data_key$BF==1,"BF1","BF2")
+
+Original_data_key$AR<-ifelse(Original_data_key$AR==1,"PR1",
+                             ifelse(Original_data_key$AR==2,"PR2",
+                                    ifelse(Original_data_key$AR==3,"PR3",
+                                           ifelse(Original_data_key$AR==4,"PR4","PR5"))))
+Original_data_key$DS<-ifelse(Original_data_key$DS==1,"DS1","DS2")
+Original_data_key$T<-ifelse(Original_data_key$T==1,"TS1","TS2")
+Original_data_key$RS<-ifelse(Original_data_key$RS==1,"RS1","RS2")
+
+
+Original_model<-Original_data_key[,c("WH","BF","NP","FA","AP","AR","DWH","T","TWR","DWR","Rank",
+                                     "RS","H","DS","NASA","TA","E","A","C","N","O","AC","EC","TC","FC","SR")]
+Sig_stars <- function(mod_summary_sign) {
+  mod_summary_stars <- NA                            
+  mod_summary_stars[mod_summary_sign < 0.1] <- "."
+  mod_summary_stars[mod_summary_sign < 0.05] <- "*"
+  mod_summary_stars[mod_summary_sign < 0.01] <- "**"
+  mod_summary_stars[mod_summary_sign < 0.001] <- "***"
+  mod_summary_stars[is.na(mod_summary_stars)] <- " "
+  return(mod_summary_stars)
+}
+
+new<-data.frame(type=c("*","**","***"),
+                x=c("3","4","6"),
+                y=c("5","4","4"))
+leg_plot=ggplot(data = new,aes(x = x, y = y, color = type, linetype = type)) + geom_line()+ 
+  theme(legend.title=element_blank(),
+        legend.key.height = unit(3, 'cm'),
+        legend.key.width = unit(3, 'cm'),
+        legend.key=element_blank())+
+  scale_linetype_manual(values = rep("solid", 3)) +
+  scale_color_manual(values = c("blue", "Orange", "Red"))+
+  theme(legend.position = "bottom") +
+  theme(legend.box = "vertical") 
+ 
+
+
+leg=get_legend(leg_plot)
+
+#SG30------------------------------------------------------
+SG30<-Original_model
+SG30$SR<-ifelse(SG30$SR==1|SG30$SR==2|SG30$SR==3,0,1)
+SG30_O_model<-glm(SR~WH+BF+NP+FA+AP+AR+DWH+T+TWR+DWR+Rank+RS+H+DS+
+                      NASA+TA+E+A+C+N+O+AC+EC+TC,family="binomial",data = SG30)
+SG30_O_model_F<-glm(SR~1,family="binomial",data = SG30)
+backward_SG30=step(SG30_O_model)
+forword_SG30=step(SG30_O_model_F,scope=list(lower=formula(SG30_O_model_F),upper=formula(SG30_O_model)),direction="forward")
+mixed_SG30=step(SG30_O_model_F,scope=list(lower=formula(SG30_O_model_F),upper=formula(SG30_O_model)),direction="both")
+#SR ~ NP + DS + H + FA + TA + T + RS + DWH (from b,f,m,AIC=424.93)
+#SR ~ NP + FA + H + TA(model in manuscript)
+SG30<-SG30[,c("NP","FA","T","RS","DWH",
+              "H","DS","TA","SR")]
+SG30$NP<-fct_relevel(as.factor(SG30$NP),"NP1")
+SG30$FA<-fct_relevel(as.factor(SG30$FA),"NSF")
+SG30$DS<-fct_relevel(as.factor(SG30$DS),"DS1")
+SG30$RS<-fct_relevel(as.factor(SG30$RS),"RS1")
+SG30$T<-fct_relevel(as.factor(SG30$T),"TS1")
+SG30$DWH<-fct_relevel(as.factor(SG30$DWH),"1")
+#model after removing DWS
+model_SG30_1<-glm(SR ~ NP + DS + H + FA + TA + T + RS ,family="binomial",data = SG30)
+#(AIC=425.24)
+#model after removing T
+model_SG30_2<-glm(SR ~ NP + DS + H + FA + TA + RS ,family="binomial",data = SG30)
+#(AIC+425.79)
+#model after removing RS
+model_SG30_3<-glm(SR ~ NP + DS + H + FA + TA  ,family="binomial",data = SG30)
+#(AIC=426.38)
+#no more insig to remove
+#final model is model_3
+
+list(summary(model_SG30_3)$coefficients[, 4])
+odds_ratio <- exp(model_SG30_3$coefficients)
+prob_ratio <- round(odds_ratio / (1 + odds_ratio), digits=3)
+table_SG30<-data.frame(
+  predictor=summary(model_SG30_3)$coefficients[, 0],
+  Prob_wise=prob_ratio,
+  Odds_ratio=summary(model_SG30_3)$coefficients[, 1],
+  std_error=summary(model_SG30_3)$coefficients[, 2],
+  Z_val=summary(model_SG30_3)$coefficients[, 3],
+  p_val=paste(round(summary(model_SG30_3)$coefficients[, 4],digit=8),Sig_stars(summary(model_SG30_3)$coefficients[, 4]))
+  
+)
+
+
+plot_SG30_NP<-effect_plot(model_SG30_3, pred = NP, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG30,color.class = c("Grey","red","Red"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="SG30",title = "Number of Proposals")+
+  scale_x_discrete(limits=c("NP1","NP2","NP3"))
+
+plot_SG30_FA<-effect_plot(model_SG30_3, pred = FA, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG30,color.class = c("Grey","Orange","Black","black","black","Orange"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Funding Agency")+
+  scale_x_discrete(limits=c("NSF","NIH","DOE","DOD","NASA","OT"))
+
+plot_SG30_BF<-ggplot(SG30)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Break Frequency")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+
+plot_SG30_PR<-ggplot(SG30)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Plot Research")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+
+plot_SG30_H<-effect_plot(model_SG30_3, pred = H, interval = TRUE,color.class = "lightblue", int.type = "confidence",data = SG30)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG30$H) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="SG30",title = "H-index")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank())
+
+
+plot_SG30_DS<-effect_plot(model_SG30_3, pred = DS, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG30,color.class = c("Grey","Orange"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Deadline Stress")+
+  scale_x_discrete(limits=c("DS1","DS2"))
+
+
+
+plot_SG30_TA<-effect_plot(model_SG30_3, pred = TA, interval = TRUE,color.class = "lightblue", int.type = "confidence",data = SG30)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG30$TA) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Trait Anxiety")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank())
+
+
+plot_SG30_E<-ggplot(SG30)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Extraversion")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+
+plot_SG30_AC<-ggplot(SG30)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Avoidance Coping")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+
+#-----------------------------------------
+SG50<-Original_data_key
+SG50$SR<-ifelse(SG50$SR==1|SG50$SR==2|SG50$SR==3|SG50$SR==4,0,1)
+SG50_O_model<-glm(SR~WH+BF+NP+FA+AP+AR+DWH+T+TWR+DWR+Rank+RS+H+DS+
+                    NASA+TA+E+A+C+N+O+AC+EC+TC,family="binomial",data = SG50)
+SG50_O_model_F<-glm(SR~1,family="binomial",data = SG50)
+backward_SG50=step(SG50_O_model)
+forword_SG50=step(SG50_O_model_F,scope=list(lower=formula(SG50_O_model_F),upper=formula(SG50_O_model)),direction="forward")
+mixed_SG50=step(SG50_O_model_F,scope=list(lower=formula(SG50_O_model_F),upper=formula(SG50_O_model)),direction="both")
+#SR ~ NP + FA + H + E + TC + BF + DS + AC + AR
+SG50<-SG50[,c("NP","FA","BF","AR","H","E","AC","TC","DS","SR")]
+SG50$NP<-fct_relevel(as.factor(SG50$NP),"NP1")
+SG50$FA<-fct_relevel(as.factor(SG50$FA),"NSF")
+SG50$BF<-fct_relevel(as.factor(SG50$BF),"BF1")
+SG50$AR<-fct_relevel(as.factor(SG50$AR),"PR1")
+SG50$DS<-fct_relevel(as.factor(SG50$DS),"DS1")
+#model after b,f,m AIC=304.31 SR ~ NP + FA + H + E + TC + BF + DS + AC + AR
+#model after removing tc (AIC: 305.07)
+model_SG50_1<-glm(SR ~ NP + FA + H + E + BF + DS + AC + AR,family="binomial",data = SG50)
+#model after removing DS (AIC: 306.58)
+model_SG50_2<-glm(SR ~ NP + FA + H + E + BF  + AC + AR,family="binomial",data = SG50)
+#model after removing AC (AIC: 308.41)
+model_SG50_3<-glm(SR ~ NP + FA + H + E + BF  + AR,family="binomial",data = SG50)
+#Ac is significant
+#final model
+
+odds_ratio <- exp(model_SG50_2$coefficients)
+prob_ratio <- round(odds_ratio / (1 + odds_ratio), digits=3)
+table_SG50<-data.frame(
+  predictor=summary(model_SG50_2)$coefficients[, 0],
+  Prob_wise=prob_ratio,
+  Odds_ratio=summary(model_SG50_2)$coefficients[, 1],
+  std_error=summary(model_SG50_2)$coefficients[, 2],
+  Z_val=summary(model_SG50_2)$coefficients[, 3],
+  p_val=paste(round(summary(model_SG50_2)$coefficients[, 4],digit=5),Sig_stars(summary(model_SG50_2)$coefficients[, 4]))
+  
+)
+
+
+plot_SG50_NP<-effect_plot(model_SG50_2, pred = NP, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG50,color.class = c("Grey","Orange","Red"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="SG30",title = "Number of Proposals")+
+  scale_x_discrete(limits=c("NP1","NP2","NP3"))
+
+plot_SG50_FA<-effect_plot(model_SG50_2, pred = FA, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG50,color.class = c("Grey","lightblue","Black","black","black","Orange"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Funding Agency")+
+  scale_x_discrete(limits=c("NSF","NIH","DOE","DOD","NASA","OT"))
+
+
+plot_SG50_BF<-effect_plot(model_SG50_2, pred = BF, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG50,color.class = c("Grey","lightblue"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Break Frequency")+
+  scale_x_discrete(limits=c("BF1","BF2"))
+
+plot_SG50_AR<-effect_plot(model_SG50_2, pred = AR, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG50,color.class = c("Grey","lightblue","Orange","lightblue","lightblue"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Pilot Research")+
+  scale_x_discrete(limits=c("PR1","PR2","PR3","PR4","PR5"))
+
+plot_SG50_H<-effect_plot(model_SG50_2, pred = H, interval = TRUE,color.class = "Orange", int.type = "confidence",data = SG50)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG50$H) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="SG50",title = "H-index")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank())
+
+plot_SG50_DS<-ggplot(SG50)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Deadline Stress")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+
+plot_SG50_TA<-ggplot(SG50)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Trait Anxiety")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+plot_SG50_E<-effect_plot(model_SG50_2, pred = E, interval = TRUE,color.class = "Orange", int.type = "confidence",data = SG50)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG50$E) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Extraversion")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank())
+
+
+plot_SG50_AC<-effect_plot(model_SG50_2, pred = AC, interval = TRUE,color.class = "Lightblue", int.type = "confidence",data = SG50)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG50$AC) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Avoidance coping")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank())
+
+
+#------------compile Figure-2
+p1<-((plot_SG30_NP+plot_SG30_FA+plot_SG30_BF+plot_SG30_PR+
+        plot_SG50_NP+plot_SG50_FA+plot_SG50_BF+plot_SG50_AR+plot_layout(ncol=4,nrow=2,heights = c(0.5,0.5))))
+
+p2<-(plot_SG30_H/plot_SG50_H)
+
+p3<-((plot_SG30_DS|plot_SG30_TA|plot_SG30_E|plot_SG30_AC)/
+    (plot_SG50_DS|plot_SG50_TA|plot_SG50_E|plot_SG50_AC))
+
+bottom<-plot_grid(p2, p3, labels = c('b', 'c'), label_size = 20,label_fontface="bold", ncol = 2,nrow = 1,rel_widths=c(0.5,2))+theme(plot.background = element_rect(color = "black",size=3))
+
+p5<- ((as_ggplot(leg)/bottom)+plot_layout(heights  = c(0.5,2)))
+
+Figuer_2<-plot_grid(p1, p5, labels = c('a', ''), label_size = 20,label_fontface="bold", ncol = 1,nrow = 2)+
+  theme(plot.background = element_rect(color = "black",size=3))
+
+
+```
+
+
+**Figure-2**\
+```{r echo=FALSE, fig.height=20, fig.width=15, message=FALSE, warning=FALSE}
+Figuer_2
+
+
+```
+
+Furthermore, The faulty with an h-index greater than one standard deviation above the mean has a 10.2% higher probability of belonging to the most Successful Group. and Lastly, as Expected, Extraverion and Avoidance coping have an opposite trend. where Faulty with Extraverion score with one Standard deviation above the mean has 13.1% less probability and Avoidance coping Score with one Standard deviation above mean has 9.1% higher probability of belonging to S~1~^G50^.\
+
+**Grant Funding Analysis:**
+We have used Logit models 4 and 5 for this analysis. By using Different Definition of Success we have divided the data into two groups, First, **Well-Funded Research Operations(S^\$75^)** where a faculty belong to the most successful class **S~1~^\$75^** if he/she estimates their grant funding to be 75% or greater of their needs and the rest belong to **S~0~^\$75^**. Second, **Fully-funded Research Operations(S^\$\$^)** where a faculty belong to the most successful group **S~1~^\$\$^** if his/her research cost is Funded fully else they belong to **S~0~^\$\$^**
+
+The Reference Researcher RR^\$75^, in this case, is similar to the above but with 42% of the time in a week is dedicated to the research with an openness score of 7.5
+
+**Comparison of S~1~^\$75^ and S~0~^\$75^**\
+if we look at figure 3a, The Funding agencies NIH, NASA, and OT have a similar probability of Reference Researcher RR^\$75^ of belonging to the S~1~^F75^ Group. and The DOD and DOE groups have a 28.0% and 28.6% higher probability of belonging to S~1~^\$75^. The faculty who dedicate one standard deviation above the meantime in a week for Research have a higher probability of 8.3% belonging to the S~1~^\$75^.So, the more amount of work dedicated to research, the more quality work is produced in turn increasing the successful funding.
+
+Furthermore, the faculty who submit the proposal before the deadline has a 12.2% less probability to belong to S~1~^\$75^. This might be the case because they might have produced less quality work by finishing the proposal early and not unitizing the extra amount of time for refining and going over the proposal again to make it better.
+
+h-index in every case has shown the same positive impact. here, faculty with an h-index higher than one standard deviation above the mean has a 6.5% higher probability with respect to RR^\$75^ of belonging to the S~1~^\$75^ group. Contrary to popular belief, adopting a hands-on Research style(RS~2~) has shown a negative impact on the Funding. RS~2~ group has a probability 10.8% lower than RR^\$75^ to belong to the S~1~^\$75^ group. this can be seen in figure 3b.
+
+
+Lastly, the Openness score has a negative impact on the funding. the faculty who has an openness score one standard deviation above the mean has a 5.3% less probability of belonging to the S~1~^\$75^ group.
+
+**Comparison between S~1~^\$\$^ and S~0~^\$\$^**\
+The reference Researcher(RR^\$\$^) here is similar to RR^\$75^. The Funding agencies Group DOD has a higher probability than RR^\$\$^ to belong to the most successful Group. Coming to Typical Week of Research, the faculty who dedicated time that falls in one SD above the mean has a higher probability of 10% to belong to the S~1~^\$\$^ Group. Just as in the case of S^\$75^, the Openness score has a negative impact on the Funding. The group whose score falls in one SD above the mean Openness score has a less probability than the RR^\$\$^ to belong to the most successful group.\
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+F75<-Original_data_key
+F75$FC<-ifelse(F75$FC==5|F75$FC==6,1,0)
+
+F75_O_model<-glm(FC~WH+BF+NP+FA+AP+AR+DWH+T+TWR+DWR+Rank+RS+H+DS+
+                    NASA+TA+E+A+C+N+O+AC+EC+TC,family="binomial",data = F75)
+F75_O_model_F<-glm(FC~1,family="binomial",data = F75)
+backward_F75=step(F75_O_model)
+forword_F75=step(F75_O_model_F,scope=list(lower=formula(F75_O_model_F),upper=formula(F75_O_model)),direction="forward")
+mixed_F75=step(F75_O_model_F,scope=list(lower=formula(F75_O_model_F),upper=formula(F75_O_model)),direction="both")
+# model after b.f.m FC ~ FA + T + TWR + RS + H + TA + E + O (AIC: 530.29)
+F75<-F75[,c("FC","FA", "T" , "TWR"  ,"RS" , "H" ,"TA" , "E" , "O")]
+F75$FA<-fct_relevel(as.factor(F75$FA),"NSF")
+F75$T<-fct_relevel(as.factor(F75$T),"TS1")
+F75$RS<-fct_relevel(as.factor(F75$RS),"RS1")
+#model after removing TA  (AIC: 530.56)
+model_F75_1<-glm(FC ~ FA + T + TWR + RS + H  + E + O,family="binomial",data = F75)
+#model after removing E (AIC: 531.61)
+model_F75_2<-glm(FC ~ FA + T + TWR + RS + H  + O ,family="binomial",data = F75)
+
+#final model 
+
+plot_F75_FA<-effect_plot(model_F75_2, pred = FA, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = F75,color.class = c("Grey","Orange","lightblue","Black","black","black"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="F75",title = "Funding Agency")+
+  scale_x_discrete(limits=c("NSF","NIH","DOE","DOD","NASA","OT"))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+plot_F75_TS<-effect_plot(model_F75_2, pred = T, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = F75,color.class = c("Grey","lightblue"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Time of Submission")+
+  scale_x_discrete(limits=c("TS1","TS2"))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+plot_F75_TWR<-effect_plot(model_F75_2, pred = TWR, interval = TRUE,color.class = "Orange", int.type = "confidence",data = F75)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(F75$TWR) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Typical Week Research")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+
+plot_F75_H<-effect_plot(model_F75_2, pred = H, interval = TRUE,color.class = "lightblue", int.type = "confidence",data = F75)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(F75$H) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="F75",title = "H-index")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+plot_F75_RS<-effect_plot(model_F75_2, pred = RS, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = F75,color.class = c("Grey","lightblue"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Research Style")+
+  scale_x_discrete(limits=c("RS1","RS2"))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+plot_F75_O<-effect_plot(model_F75_2, pred = O, interval = TRUE,color.class = "lightblue", int.type = "confidence",data = F75)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(F75$O) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Openness")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+
+
+#-----------------------------full
+full<-Original_data_key
+full$FC<-ifelse(full$FC==6,1,0)
+full_O_model<-glm(FC~WH+BF+NP+FA+AP+AR+DWH+T+TWR+DWR+Rank+RS+H+DS+
+                   NASA+TA+E+A+C+N+O+AC+EC+TC,family="binomial",data = full)
+full_O_model_F<-glm(FC~1,family="binomial",data = full)
+backward_full=step(full_O_model)
+forword_full=step(full_O_model_F,scope=list(lower=formula(full_O_model_F),upper=formula(full_O_model)),direction="forward")
+mixed_full=step(full_O_model_F,scope=list(lower=formula(full_O_model_F),upper=formula(full_O_model)),direction="both")
+#model after b,f,m FC ~ TWR + FA + O + TC + RS + T (AIC: 404.88)
+full<-full[,c("FC","FA","TWR","O","TC","RS","T")]
+full$FA<-fct_relevel(as.factor(full$FA),"NSF")
+full$RS<-fct_relevel(as.factor(full$RS),"RS1")
+full$T<-fct_relevel(as.factor(full$T),"TS1")
+#model after removing RS (AIC: 405.39)
+model_Full_1<-glm(FC~TWR + FA + O + TC + T,family="binomial",data = full)
+summary(model_Full_1)
+#model after removing T (AIC: 405.61)
+model_Full_2<-glm(FC~TWR + FA + O + TC ,family="binomial",data = full)
+summary(model_Full_2)
+#model after removing TC (AIC: 406.73)
+model_Full_3<-glm(FC~TWR + FA + O  ,family="binomial",data = full)
+summary(model_Full_3)
+
+
+plot_Full_FA<-effect_plot(model_Full_3, pred = FA, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = full,color.class = c("Grey","red","black","Black","black","black"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="Full",title = "Funding Agency")+
+  scale_x_discrete(limits=c("NSF","NIH","DOE","DOD","NASA","OT"))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+plot_Full_TS<-ggplot(full)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Time of submission")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+
+plot_Full_TWR<-effect_plot(model_Full_3, pred = TWR, interval = TRUE,color.class = "red", int.type = "confidence",data = full)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(full$TWR) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Typical Week Research")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+plot_Full_h<-ggplot(full)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "h-index")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+plot_Full_RS<-ggplot(full)+
+  theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  labs(title = "Research style")+theme(plot.margin = unit(c(1,1,1,1),"cm"))
+
+
+plot_Full_O<-effect_plot(model_Full_3, pred = O, interval = TRUE,color.class = "lightblue", int.type = "confidence",data = full)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(full$O) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14),axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Openness")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+
+
+###-------------compile Figure-3
+
+
+p1<-((plot_F75_FA+plot_F75_TS+plot_F75_TWR+plot_Full_FA+
+        plot_Full_TS+plot_Full_TWR+
+        plot_layout(ncol=3,nrow=2,heights = c(0.5,0.5))))
+
+p2<-(plot_F75_O/plot_Full_O)
+
+p3<-((plot_F75_H|plot_F75_RS)/
+       (plot_Full_h|plot_Full_RS))
+
+bottom<-plot_grid(p3, p2, labels = c('b', 'c'), label_size = 20,label_fontface="bold", ncol = 2,nrow = 1,rel_widths=c(1,0.5))+theme(plot.background = element_rect(color = "black",size=3))
+
+p5<- ((as_ggplot(leg)/bottom)+plot_layout(heights  = c(0.5,2)))
+
+Figuer_3<-plot_grid(p1, p5, labels = c('a', ''), label_size = 20,label_fontface="bold", ncol = 1,nrow = 2)+theme(plot.background = element_rect(color = "black",size=3))
+
+
+```
+
+
+**Figure-3**\
+```{r echo=FALSE, fig.height=20, fig.width=15, message=FALSE, warning=FALSE}
+Figuer_3
+```
+
+**Combined Analysis(Grantsmanship and Grant Funding)**
+Here, we combine the above two analyses. Logit model 6 is used for this analysis. The Response variable is formed by considering faculty with Grantsmanship above 50% and fully funded to Group (S~1~^G50\$\$^) and the rest to Group (S~0~^G50\$\$^).\
+
+Reference Researcher here  (RR^G50\$\$^), has an Agreeable score of 7.5 and an extraversion score of 6.0 and submits 1-2 proposals a year and devotes 42% of the time in a week to Research.\
+
+If we see in the below figure-4, Follows a similar trend which we have seen in Grantsmanship for the Number of proposals. The Probability of a faculty decreases with an increase in the submission of a number of proposals per year. i.e, of NP~2~ there is a fall of 8.4% and for NP~3~ it is 9.4% with respect to RR^G50\$\$^.Next, For a faculty with a typical week of Research on SD above the mean has a 7% higher probability of belonging to The most Successful Group.\
+
+Finally, Extraversion and Agreeableness scores follow an opposite trend. The faculty with more Extroversion score has less probability of belonging to S~1~^G50\$\$^ and the opposite is true of Agreeableness.\
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+SG50f<-Original_data_key
+SG50f$jj<-ifelse(SG50f$FC==6 & (SG50f$SR==5|SG50f$SR==6|SG50f$SR==7),1,0)
+SG50f_O_model<-glm(jj~WH+BF+NP+FA+AP+AR+DWH+T+TWR+DWR+Rank+RS+H+DS+
+                    NASA+TA+E+A+C+N+O+AC+EC+TC,family="binomial",data = SG50f)
+SG50f_O_model_F<-glm(jj~1,family="binomial",data = SG50f)
+backward_50f=step(SG50f_O_model)
+forword_50f=step(SG50f_O_model_F,scope=list(lower=formula(SG50f_O_model_F),upper=formula(SG50f_O_model)),direction="forward")
+mixed_50f=step(SG50f_O_model_F,scope=list(lower=formula(SG50f_O_model_F),upper=formula(SG50f_O_model)),direction="both")
+
+#model after b,f,m jj ~ NP + TWR + E + A + RS + O, (AIC=159.83)
+SG50f<-SG50f[,c("jj","NP" ,"TWR" ,"E" ,"A" , "RS" , "O")]
+SG50f$NP<-fct_relevel(as.factor(SG50f$NP),"NP1")
+SG50f$RS<-fct_relevel(as.factor(SG50f$RS),"RS1")
+#model after removing RS (AIC: 160.52)
+model_1<-glm(jj ~ NP + TWR + E + A + O,data=SG50f,family="binomial")
+#model after removing O (AIC: 160.95)
+model_2<-glm(jj ~ NP + TWR + E + A ,data=SG50f,family="binomial")
+#final model
+
+
+
+list(summary(model_2)$coefficients[, 4])
+odds_ratio <- exp(model_2$coefficients)
+prob_ratio <- round(odds_ratio / (1 + odds_ratio), digits=3)
+
+table_5<-data.frame(
+  predictor=summary(model_2)$coefficients[, 0],
+  Prob_wise=prob_ratio,
+  Odds_ratio=summary(model_2)$coefficients[, 1],
+  std_error=summary(model_2)$coefficients[, 2],
+  Z_val=summary(model_2)$coefficients[, 3],
+  p_val=paste(round(summary(model_2)$coefficients[, 4],digit=5),Sig_stars(summary(model_2)$coefficients[, 4]))
+  
+)
+
+
+
+
+plot_1<-effect_plot(model_2, pred = NP, interval = TRUE, cat.interval.geom = "linerange",int.type = "confidence",data = SG50f,color.class = c("Grey","Orange","Orange"))+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 1, by = 0.25),limits = c(0,1))+
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14))+
+  labs(x="" , y="SG50$$",title = "Number of Proposals")+
+  scale_x_discrete(limits=c("NP1","NP2","NP3"))
+
+
+plot_2<-effect_plot(model_2, pred = TWR, interval = TRUE,color.class = "Orange", int.type = "confidence",data = SG50f)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG50f$TWR) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14) ,axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Typical Week Research")
+  
+
+plot_3<-effect_plot(model_2, pred = E, interval = TRUE,color.class = "Blue", int.type = "confidence",data = SG50f)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG50f$E) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14) ,axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Extraversion")
+
+plot_4<-effect_plot(model_2, pred = A, interval = TRUE,color.class = "Blue", int.type = "confidence",data = SG50f)+
+  scale_y_continuous( labels = percent ,breaks = seq(0, 2, by = 0.25),limits = c(0,1))+
+  geom_vline(xintercept =mean(SG50f$A) , linetype="dotted", color = "grey", size=1)+ 
+  theme(panel.border = element_rect(color = "#000000",fill = NA,size = 1),plot.title = element_text(hjust = 0.5, size = 14) ,axis.text.y=element_blank(),axis.ticks.y=element_blank())+
+  labs(x="" , y="",title = "Agreeableness")
+
+
+
+```
+
+**Figure-4**\
+```{r echo=FALSE, fig.height=10, fig.width=15, message=FALSE, warning=FALSE}
+Figuer_4<-((plot_1+plot_2+plot_3+plot_4+
+              plot_layout(ncol=4,nrow=1)))/as_ggplot(leg)
+Figuer_4
+
+```
+
+**Appendix**
+Before arriving at the Optimized model, we have done backward, forward, and step-wise selection methods to remove the predictors which are not useful for the prediction of the appropriate response variable.
+
+          Logit(RV)~WH+BF+NP+FA+AP+AR+DWH+T+TWR+DWR+Rank+RS+H+DS+NASA+TA+E+A+C+N+O+AC+EC+TC
+
+The above equation is the full model(logit 1) which contains both categorical and continuous variables.
+
+**Logit-2:(S^G30^)**
+Starting with the above equation, we have applied backward selection on it which gave me the following model as the final result after removing features based on AIC.it has an AIC score of 424.93.
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(backward_SG30)
+```
+we have observed that all the models gave the same result and with similar AIC, so, the result was only given in the report once. we can see that there are few predictors in the results which are not that significant for the response variable so we went on removing them one by one while checking the AIC.
+
+The below is the result for the model after removing "DWH" (**SR ~ NP + DS + H + FA + TA + T + RS**) it has an AIC of 425.24, although it is higher than the previous one, it is just by one unit. a one-unit change in the AIC will is not a very big difference compared to the benefit of having less number of Predictors in the model.
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_SG30_1)
+```
+
+We can still see that T and RS are not that significant for the model so, we have removed T(**SR ~ NP + DS + H + FA + TA + RS**) first. below is the result, it has an AIC of AIC: 425.79, still not a significant difference.
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_SG30_2)
+```
+The result after removing RS(**SR ~ NP + DS + H + FA + TA**) is shown below, it has an AIC of 426.38. but there are no predictors to remove now and comparing all the models AIC and the number of predictors, we found this model to be the final model.it has 5 predictors which is less compared to all the models we have checked and has an AIC only one-unit greater than the model with least AIC which is acceptable.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_SG30_3)
+```
+
+SO Logit-2 is **SR ~ NP + DS + H + FA + TA** and below is the Parameters estimate.
+
+```{r echo=FALSE,fig.height=5, fig.width=8,message=FALSE, warning=FALSE, paged.print=FALSE}
+table_SG30 <- cbind(Predictor = rownames(table_SG30), table_SG30)
+rownames(table_SG30) <- 1:nrow(table_SG30)
+grid.table(table_SG30)
+```      
+**Logit-3(S^G50^)**
+Same above Procedure is followed for this analysis too, we have started with Logit-1 equation and preceded with forward, backward and step-wise selection methods. Just as above all the selection methods have give me the exactly the same results. below is the summary of it.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(backward_SG50)
+```
+ it has an AIC of  304.31, and there are few insignificant predictors, so i have removed then one after the other checking the AIC. Below is the summary of the model after removing TC(**SR ~ NP + FA + H + E + BF + DS + AC + AR**) it has got the AIC of 305.07, As mentioned above it not that much of a difference compared to the above method.
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_SG50_1)
+``` 
+it has still got some insignificant predictors to it like DS(**SR ~ NP + FA + H + E + BF + AC + AR**). so i have removed it.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_SG50_2)
+```        
+ The AIC of this model is 306.58, if we compare the two above models, AC which was significant in the above model is not anymore after removing DS. so i have removed it to from the model below is the summary(**SR ~ NP + FA + H + E + BF + AR**)
+ 
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_SG50_3)
+```        
+After removing AC, i AIC has changed to 308.41, which is more than two units from our previous model which is considered high. so after comparing all the three models and their AIC's and number of predictors, we have come to a conclusion that the second model is the final model.The last model might has had the least number of predictors but the comparing the AIC The last model as mentioned above more than two unit difference is AIC is considered high.
+
+so, logit-3 is **SR ~ NP + FA + H + E + BF + AC + AR** and below is the Parameters estimate
+
+```{r echo=FALSE, message=FALSE,fig.height=6, fig.width=8, warning=FALSE, paged.print=FALSE}
+table_SG50 <- cbind(Predictor = rownames(table_SG50), table_SG50)
+rownames(table_SG50) <- 1:nrow(table_SG50)
+grid.table(table_SG50)
+```      
+**Logit-4(S^\$75^)**
+we have started with Logit-1 equation and preceded with forward, backward and step-wise selection methods. Just as above all the selection methods have give me the exactly the same results. below is the summary of it.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(backward_F75)
+```
+The AIC of the above model is 530.29, there are few insignificant predictors present so after removing one of them TA(**FC ~ FA + T + TWR + RS + H + E + O**),below is the result.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_F75_1)
+```
+there is only a 0.27 increase in the AIC which is insignificant, the next predictor i have removed is E(**FC ~ FA + T + TWR + RS + H + O**), below is the result
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_F75_2)
+```
+the AIC has increased to 531.61. which is acceptable. and if we observe the two models above, the openness score was insignificant in the first model but became significant after removing Extraversion(E). so, After comparing the AIC values and number of predictors we have decided that the above model is best suited for this analysis because it has the least number of predictors and AIC with only one-unit difference compared to the model with least AIC.
+
+so, Logit-4 is **FC ~ FA + T + TWR + RS + H + O** and below is the parameter estimate
+```{r echo=FALSE, message=FALSE, warning=FALSE,fig.height=5, fig.width=7, paged.print=FALSE}
+odds_ratio <- exp(model_F75_2$coefficients)
+prob_ratio <- round(odds_ratio / (1 + odds_ratio), digits=3)
+
+table_F75<-data.frame(
+  predictor=summary(model_F75_2)$coefficients[, 0],
+  Prob_wise=prob_ratio,
+  Odds_ratio=summary(model_F75_2)$coefficients[, 1],
+  std_error=summary(model_F75_2)$coefficients[, 2],
+  Z_val=summary(model_F75_2)$coefficients[, 3],
+  p_val=paste(round(summary(model_F75_2)$coefficients[, 4],digit=5),Sig_stars(summary(model_F75_2)$coefficients[, 4]))
+  
+)
+table_F75 <- cbind(Predictor = rownames(table_F75), table_F75)
+rownames(table_F75) <- 1:nrow(table_F75)
+grid.table(table_F75)
+
+```
+
+**Logit-5(S^\$\$^)**
+
+Even for this Analysis we have got the same results for all the three selection methods.below is the summary of it.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(backward_full)
+```
+AIC of the above model is 404.88, have we have few insignificant features.so, first i have removed RS(**FC ~ TWR + FA + O + TC + T**) and checked the AIC, it was 405.39
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_Full_1)
+```
+next, i have removed T(**FC ~ TWR + FA + O + TC**),then it gave us the AIC  405.61, below is the result
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_Full_2)
+```
+we, still have one insignificant feature that is TC(**FC ~ TWR + FA + O**), after removing it we got the below model.
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_Full_3)
+```
+
+we, got an AIC of 406.73. we don't have any more features to remove so, after comparing all the models AIC and number of predictors, we have choose the above model which has an AIC of 406.73 with 3 predictors as our final model.
+
+so,Logit-5 is **FC ~ TWR + FA + O** and below is the parameter estimate
+
+```{r echo=FALSE, message=FALSE, warning=FALSE,fig.height=5, fig.width=7, paged.print=FALSE}
+odds_ratio <- exp(model_Full_3$coefficients)
+prob_ratio <- round(odds_ratio / (1 + odds_ratio), digits=3)
+
+table_full<-data.frame(
+  predictor=summary(model_Full_3)$coefficients[, 0],
+  Prob_wise=prob_ratio,
+  Odds_ratio=summary(model_Full_3)$coefficients[, 1],
+  std_error=summary(model_Full_3)$coefficients[, 2],
+  Z_val=summary(model_Full_3)$coefficients[, 3],
+  p_val=paste(round(summary(model_Full_3)$coefficients[, 4],digit=8),Sig_stars(summary(model_Full_3)$coefficients[, 4]))
+  
+)
+table_full <- cbind(Predictor = rownames(table_full), table_full)
+rownames(table_full) <- 1:nrow(table_full)
+grid.table(table_full)
+
+```
+**Logit-6 (S^G50\$\$^) **
+The result of all the feature selection models is below
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(backward_50f)
+```
+The above model has a AIC of 159.83 with 6 parameters. below is the result after removing RS insignificant Predictor(**jj ~ NP + TWR + E + A + O**)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_1)
+```
+we have got an AIC of 160.52, we can see that Openness is insignificant so we have removed it.
+and below is the result.(**jj ~ NP + TWR + E + A**)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+summary(model_2)
+```
+This model has an AIC of 160.95 with no further insignificant predictors so, we have stopped the search here. after looking at the three models AIC and Number of predictors we can considered the last model with AIC 160.95 with 4 predictors as our final model for this analysis because it has the less number of predictors and only one unit high AIC which is acceptable. 
+
+so, Logit-6 is **jj ~ NP + TWR + E + A** and the parameter estimate table is below
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+table_5 <- cbind(Predictor = rownames(table_5), table_5)
+rownames(table_5) <- 1:nrow(table_5)
+grid.table(table_5)
+```
+
+

@@ -1,0 +1,228 @@
+---
+title: "Milestone_1"
+author: "Prananditha M"
+date: "2/24/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+**MileStone - 1**
+
+The main purpose of the Dataset under Analysis is to Predictors of grantsmanship and funding success for U.S. researchers. The role of traits and Scholarly attributes vs Tactics are used to predict the grant funding success. The Data is collected using different Questionnaires including Core Questionnaire (CQ) and three psychometric instruments - the State-Trait Anxiety Inventory (STAI) Form Y2, Big-Five Personality Test, and the Coping Inventory for Stressful Situations (CISS).
+
+
+The following are the Total Attributes used.
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library("dplyr")
+library("ggplot2")
+library("tidyr")
+library("scales")
+library("ggpubr")
+setwd('C:/Users/mpran/OneDrive/Desktop/UH_Sem2/STAT/Project/')
+Original_data<- read.csv("AllData.csv")
+names(Original_data)
+```
+
+
+**Rows**
+```{r echo=FALSE,warning = FALSE}
+nrow(Original_data)
+```
+
+**Coloumn**
+```{r echo=FALSE,warning = FALSE}
+ncol(Original_data)
+```
+The Limitation of The Milestone - 1 is to review certain variables which correlate to the odds of successful funding. These variables fall under three main categories: Research Tactics, Scholar Profile, and Personality. These variables are Briefly Reviewed Below.
+
+```{r echo=FALSE}
+
+#Weekly workload
+Data_wna<-Original_data[!is.na(Original_data$WH),]
+total_wna=nrow(Data_wna)
+plot1<-ggplot(Data_wna, aes(x=WH))+ggtitle("Weekly Workload[hrs]")+scale_x_discrete(limits=c("< 30","30-40","40-50","> 50"))+
+  geom_bar( fill="steelblue")+labs( y= "# of Respondants")+ylim(0, 250)+theme(panel.grid.major = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
+  geom_text(stat='count', aes(label=after_stat(percent((count/total_wna),accuracy = 1)),vjust=-1 ))+theme(axis.title.x = element_blank(),axis.title.y = element_blank(),plot.title = element_text(hjust = 0.5))
+
+
+
+#research Load
+Data_wna_rl<-Original_data[!is.na(Original_data$TWR),]
+total_wna_rl<-nrow(Data_wna_rl)
+Data_wna_rl$Research_load<-ifelse(Data_wna_rl$TWR<= 20,"<20",
+                                  ifelse(Data_wna_rl$TWR== 30,"30",
+                                         ifelse(Data_wna_rl$TWR== 40,"40",
+                                                ifelse(Data_wna_rl$TWR== 50,"50",
+                                                       ifelse(Data_wna_rl$TWR== 60,"60",
+                                                              ifelse(Data_wna_rl$TWR>=70,">70","N/A"))))))
+                
+
+plot2<-ggplot(Data_wna_rl, aes(x=Research_load))+ggtitle("Research Load[%]")+scale_x_discrete(limits=c("<20","30","40","50","60",">70"))+
+  geom_bar( fill="steelblue")+ylim(0, 100)+theme(panel.grid.major = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
+  geom_text(stat='count', aes(label=after_stat(percent((count/total_wna),accuracy = 1)),vjust=-1 ))+theme(axis.title.x = element_blank(),axis.title.y = element_blank(),plot.title = element_text(hjust = 0.5))
+
+
+#Funding Coverage
+Data_wna_FF<-Original_data[!is.na(Original_data$Research_Funded_By_External_Grants),]
+total_wna_FF<-nrow(Data_wna_rl)
+
+Data_wna_FF$Funds<-ifelse(Data_wna_FF$Research_Funded_By_External_Grants=="Fully funded","FF",
+                          ifelse(Data_wna_FF$Research_Funded_By_External_Grants=="100-75%","75-100",
+                            ifelse(Data_wna_FF$Research_Funded_By_External_Grants=="25-1%","1-25",
+                                  ifelse (Data_wna_FF$Research_Funded_By_External_Grants=="50-25%","25-50",
+                                          ifelse (Data_wna_FF$Research_Funded_By_External_Grants=="75-50%","50-75",
+                                                  ifelse (Data_wna_FF$Research_Funded_By_External_Grants=="Not funded","NF","NA"))))))
+
+plot3<-ggplot(Data_wna_rl, aes(x=Data_wna_FF$Funds))+ggtitle("Funding Coverage[%]")+scale_x_discrete(limits=c("NF","1-25","25-50","50-75","75-100","FF"))+
+  geom_bar( fill="steelblue")+theme(panel.grid.major = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
+  geom_text(stat='count', aes(label=after_stat(percent((count/total_wna_FF),accuracy = 1)),vjust=-1 ))+theme(axis.title.x = element_blank(),axis.title.y = element_blank(),plot.title = element_text(hjust = 0.5))
+
+
+
+#Gender Distribution
+Data_wna_Gender<-Original_data[!is.na(Original_data$Gender),]
+total_wna_FF<-nrow(Data_wna_Gender)
+
+plot4<-ggplot(Data_wna_Gender, aes(x=Gender))+ggtitle("Gender Distribution")+scale_x_discrete(limits=c("Female","Male"))+
+  geom_bar( fill="steelblue",width=0.7)+labs( y= "# of Respondants")+theme(panel.grid.major = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
+  geom_text(stat='count', aes(label=after_stat(percent((count/total_wna_FF),accuracy = 0.5)),vjust=-1 ))+theme(axis.title.x = element_blank(),axis.title.y = element_blank(),plot.title = element_text(hjust = 0.5))
+
+
+#Disciplinary Distribution
+Data_wna_DD<-Original_data
+
+Data_wna_DD$Disciplinary_Distribution <- with(Data_wna_DD, if_else((Data_wna_DD$Department %in% c("Applied Math","Environmental Studies", "Oceanography", "Chemistry", "Chemistry and Biochemistry","Mathematics","Physics", "Geosciences" )) | (Data_wna_DD$Department_Other %in% c("Applied Math","Environmental Studies", "Chemistry and Biochemistry", "Oceanography",  "Chemistry", "Physics", "Geosciences", "Mathematics") ) , "NAT" ,
+                                                             if_else((Data_wna_DD$Department %in% c("Informatics", "Information", "Information and Logistics Technology", "Information Science", "Computer Science", "Scientific Computing")) | (Data_wna_DD$Department_Other %in% c("Informatics", "Information", "Information and Logistics Technology", "Information Science", "Computer Science", "Scientific Computing")) , "CIS" ,
+                                                                     ifelse((Data_wna_DD$Department  %in% c("Engineering" ,"Learning Sciences"," Management","Operations Research", "Technology", "Statistical Sciences", "Engineering"))| (Data_wna_DD$Department_Other %in% c("Engineering" ,"Learning Sciences"," Management", "Statistical Sciences","Operations Research", "Technology", "Engineering")),"ENG",                                                                         
+                                                                            if_else((Data_wna_DD$Department %in% c("Health", "Health and Human Performance", "HHP", "Neurobiology", "Optometry",  "Neuroscience","Pharmacological and Pharmaceutical Sciences", "Pharmacy", "Vision Science", "Biology", "Medicine", "Pharmacy" ))| (Data_wna_DD$Department_Other %in% c("Health", "Health and Human Performance", "HHP", "Neurobiology", "Neuroscience", "Optometry", "Pharmacological and Pharmaceutical Sciences", "Pharmacy", "Vision Science", "Biology", "Medicine", "Pharmacy")) , "BIO" ,"BEHAV" ))) ))
+
+total_co<-nrow(Data_wna_DD$Disciplinary_Distribution)
+plot5<-ggplot(Data_wna_DD, aes(x=Disciplinary_Distribution ))+ggtitle("Disciplinary Distribution")+scale_x_discrete(limits=c("BIO","BEHAV","ENG","CIS","NAT"))+
+  geom_bar( fill="steelblue",width=0.4)+theme(panel.grid.major = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
+  geom_text(stat='count', aes(label=after_stat(percent((count/total_wna_FF),accuracy = 1)),vjust=-1 ))+theme(axis.title.x = element_blank(),axis.title.y = element_blank(),plot.title = element_text(hjust = 0.5))
+
+
+
+#Geographical Distribution
+Data_wna_gep<-Original_data[!is.na(Original_data$State),]
+total_wna_gep=nrow(Data_wna_gep)
+Data_wna_gep$geo <- with(Data_wna_gep,ifelse(Data_wna_gep$State %in% c("Connecticut", "Maryland", "Massachusetts", "New Jersey", "New York", "Pennsylvania","Virginia","North Carolina") ,"East",
+                                     ifelse(Data_wna_gep$State %in% c("Illinois", "Michigan", "Minnesota", "Ohio"," Wisconsin"),"Midwest",
+                                            ifelse(Data_wna_gep$State %in% c("Arizona", "California", "Colorado", "Nevada", "New Mexico", "Oregon", "Utah"),"West",
+                                                   "South"))))
+
+plot6<-ggplot(Data_wna_gep, aes(x=geo))+ggtitle("Geographical Distribution")+scale_x_discrete(limits=c("East","West","Midwest","South"))+
+  geom_bar( fill="steelblue",width=0.4)+theme(panel.grid.major = element_blank(),panel.background = element_blank(),axis.line = element_line(colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=1))+
+  geom_text(stat='count', aes(label=after_stat(percent((count/total_wna_gep),accuracy = 1)),vjust=-1 ))+theme(axis.title.x = element_blank(),axis.title.y = element_blank(),plot.title = element_text(hjust = 0.5))
+
+```
+
+
+```{r echo=FALSE,fig.width=15,fig.height=12}
+test=ggarrange(plot4,plot5,plot6,plot1,plot2,plot3,
+               ncol=3,
+               nrow=2)
+test
+```
+\
+If we look at the first Graph "Gender Distribution".\
+
+```{r echo=FALSE,fig.height=6}
+plot4
+```
+\
+Among all the 403 participants from 70PhD Granting institutes in the USA, Majority of them are male.\
+
+**Disciplinary Distribution**\
+```{r echo=FALSE,fig.height=6}
+plot5
+```
+\
+The graph above shows the distribution of Disciplines the participants fall into.\
+BIO : biological sciences\
+BEHAV : behavioral sciences\
+ENG : engineering\
+CIS : computer and  information sciences\
+NAT : natural sciences\
+
+More than half of the participants belong to engineering and natural sciences and there are only a few number of researchers from behavioral sciences.\
+\
+**Geographic Distribution**\
+
+```{r echo=FALSE,fig.height=6}
+plot6
+```
+\
+When we look at the geographic distribution of the researchers, most of them belong to the southern part of the united states which includes "Florida, Georgia, Tennessee, Texas, Alabama, Oklahoma". and equally distributed across East,West and Midwest.\
+\
+**Weekly Workload**\
+```{r echo=FALSE,fig.height=6}
+plot1
+```
+\
+When asked about the total time in a week that they are devoting to work, half of them said more than 50 hours, 35% said that they work for 40 to 50 hours and only 9% of the participants work for 40 hours or less.\
+\
+**Research Load**\
+```{r echo=FALSE,fig.height=6}
+plot2
+```
+\
+Among the Researchers, only 7% of them dedicate more than 70 hours of their work time to research.50% for them dedicate around 40-50 hours of their work time to research.\
+\
+**Funding Coverage**\
+```{r echo=FALSE,fig.height=6}
+plot3
+```
+\
+As depicted above only 23% of the researchers are fully funded for research Operations, Operational costs include summer salaries for faculty, postdoctoral stipends, research assistantships, & equipment.\
+
+\
+**Distributions lifestyle disruptions before the Deadline**\
+```{r echo=FALSE}
+New_data<-data.frame(
+  type=c("Regular Research","Sleep","Diet","Physical Activity","Interpersonal Relationships"),
+  No_disruption=c(as.integer(count(filter(Original_data,P_Disrupted_Research==1)))
+                             ,as.integer(count(filter(Original_data,P_Disrupted_Sleep==1)))
+                             ,as.integer(count(filter(Original_data,P_Disrupted_Diet==1)))
+                             ,as.integer(count(filter(Original_data,P_Disrupted_PA==1)))
+                             ,as.integer(count(filter(Original_data,P_Disrupted_IR==1)))),
+  Little=c(as.integer(count(filter(Original_data,P_Disrupted_Research==2)))
+           ,as.integer(count(filter(Original_data,P_Disrupted_Sleep==2)))
+           ,as.integer(count(filter(Original_data,P_Disrupted_Diet==2)))
+           ,as.integer(count(filter(Original_data,P_Disrupted_PA==2)))
+           ,as.integer(count(filter(Original_data,P_Disrupted_IR==2)))),
+  Moderate=c(as.integer(count(filter(Original_data,P_Disrupted_Research==3)))
+             ,as.integer(count(filter(Original_data,P_Disrupted_Sleep==3)))
+             ,as.integer(count(filter(Original_data,P_Disrupted_Diet==3)))
+             ,as.integer(count(filter(Original_data,P_Disrupted_PA==3)))
+             ,as.integer(count(filter(Original_data,P_Disrupted_IR==3)))),
+  Significant=c(as.integer(count(filter(Original_data,P_Disrupted_Research==4)))
+                ,as.integer(count(filter(Original_data,P_Disrupted_Sleep==4)))
+                ,as.integer(count(filter(Original_data,P_Disrupted_Diet==4)))
+                ,as.integer(count(filter(Original_data,P_Disrupted_PA==4)))
+                ,as.integer(count(filter(Original_data,P_Disrupted_IR==4)))),
+  extremely_disruption=c(as.integer(count(filter(Original_data,P_Disrupted_Research==5)))
+                         ,as.integer(count(filter(Original_data,P_Disrupted_Sleep==5)))
+                         ,as.integer(count(filter(Original_data,P_Disrupted_Diet==5)))
+                         ,as.integer(count(filter(Original_data,P_Disrupted_PA==5)))
+                         ,as.integer(count(filter(Original_data,P_Disrupted_IR==5))))
+  
+)
+
+
+data_long <- gather(New_data, condition, measurement, No_disruption:extremely_disruption, factor_key=TRUE)
+plot_s1<-ggplot(data_long,aes(fill=forcats::fct_rev(condition),x=type,y=measurement))+scale_fill_manual(values = c("red3","orchid1","white","lightblue2","blue"))+scale_x_discrete(limits=c("Diet","Interpersonal Relationships","Physical Activity","Sleep","Regular Research"),guide = guide_axis(n.dodge=2))+ theme(legend.position="top",legend.title = element_blank())+
+geom_bar(stat="identity",position="fill")+scale_y_continuous(labels = scales::percent)+labs(y = "Respondents[%]")
+plot_s1
+```
+\
+When researchers are asked about which part of their life is most disrupted leading to a Proposal deadline. The majority of them said that Regular Research is mostly disrupted, Follows it is Sleep. And only a few of them say that Diet is extremely Disrupted before an upcoming Proposal Deadline.

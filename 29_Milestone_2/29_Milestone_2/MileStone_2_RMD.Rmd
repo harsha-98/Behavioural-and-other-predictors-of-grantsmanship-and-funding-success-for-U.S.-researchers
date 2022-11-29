@@ -1,0 +1,629 @@
+---
+title: "MileStone-II"
+author: "Prananditha M and Harshika A"
+date: "4/1/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**MileStone - 2**\
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library("dplyr")
+library("ggplot2")
+library("tidyr")
+library("scales")
+library("ggpubr")
+library("cowplot")
+```
+
+
+```{r echo=FALSE,warning = FALSE}
+setwd('C:/Users/mpran/OneDrive/Desktop/UH_Sem2/STAT/Project/')
+Original_data<- read.csv("AllData.csv")
+
+
+##graphs
+
+
+data_table75 <- read.csv("Milestone-II/Table_$75.csv",fileEncoding = 'UTF-8-BOM')
+S_Full<- read.csv("Milestone-II/S_Full.csv",fileEncoding = 'UTF-8-BOM')
+G_30<- read.csv("Milestone-II/SG_30.csv",fileEncoding = 'UTF-8-BOM')
+G_50_ff<- read.csv("Milestone-II/G50_ff.csv",fileEncoding = 'UTF-8-BOM')
+G_50<- read.csv("Milestone-II/G_50_new.csv",fileEncoding = 'UTF-8-BOM')
+
+```
+
+**part-1**\
+Chi Squared goodness fit test on the Gender distribution in the sample  with the gender distribution in the US Universities.\
+**H0:The Data belongs to the same Specified Distribution.**\
+**H1:The Data belongs to the Different Distribution.**\
+```{r echo=FALSE,warning = FALSE}
+total=as.integer(count(filter(Original_data,Gender=="Male")))+as.integer(count(filter(Original_data,Gender=="Female")))
+Gender_dis<-data.frame(
+  type=c("male","female"),
+  sample=c(as.integer(count(filter(Original_data,Gender=="Male")))*100/total,as.integer(count(filter(Original_data,Gender=="Female")))*100/total),
+  US_UNI=c(64.8,35.2))
+
+chisq.test(Gender_dis$sample,Gender_dis$US_UNI,correct = FALSE)
+
+```
+
+It is clear when we look at the p-value(0.1573) > 0.05. Which advocate to accepting the null hypothesis.which means that the gender distribution in the sample selected is similar to the Gender distribution in the US Universities.\
+**Part-2**\
+**Figure-2**\
+
+**Successful Grantsmanship(S^G30^):**  This is the baseline Configuration,it features a more permissive definition of Success in Grantsmanship.i.e, 30%. Respondents who estimates a success rate greater 30% belongs to S~1~^G30^ group and the Respondents who estimates a success rate below  30% belongs to S~0~^G30^ group.\ 
+
+
+**highly Successful Grantsmanship(S^G50^):** This is the ultimate Configuration, it features a more strict definition of Success,i.e, 50%.Respondents who estimates a success rate greater 50% belongs to S~1~^G50^ group and the Respondents who estimates a success rate below 50% belongs to S~0~^G50^ group.\
+
+
+
+
+
+**number of Proposals for Successful Grantsmanship(S^G30^)**\
+```{r echo=FALSE,warning = FALSE}
+##figure-2##
+##plot_1##
+NP_g30<-distinct(G_30,NP,.keep_all=TRUE)
+plot_1<-ggplot() +
+  geom_linerange(data=NP_g30, mapping=aes(x=NP, ymin=Lower_limit, ymax=Upper_limit ),colour = c("grey","red","red")) + 
+  geom_point(data=NP_g30, mapping=aes(x=NP, y=Prediction), size=4,  colour = c("grey","red","red")) + 
+  labs(x="" , y="SG30",title = "Number of Proposals") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("NP1","NP2","NP3"))
+plot_1
+```
+In the Successful Grantsmanship group, Respondents who submits more proposals an year belong to NP3 Category while the least belong to NP1. we can see from the above graph that ,with the increase in the number of proposals, the probability of them belonging to the group S~1~^G30^ decreases. which means that Researchers who submit only few(1 or 2 per years) are more likely to Achieve a Grantsmanship.\
+
+
+**number of Proposals for Highly Successful Grantsmanship(S^G50^)**\
+```{r echo=FALSE,warning = FALSE}
+##plot_5##
+#Number of Proposals - G50
+NP_g50<-distinct(G_50,NP,.keep_all=TRUE)
+plot_5<-ggplot() +
+  geom_linerange(data=NP_g50, mapping=aes(x=NP, ymin=Lower_Limit, ymax=Upper_Limit),colour = c("grey","orange","red"),size=1) + 
+  geom_point(data=NP_g50, mapping=aes(x=NP, y=Prediction), size=4,  colour = c("grey","orange","red")) + 
+  labs(x="" , y="SG50",title = "Number of Proposals") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("NP1","NP2","NP3"))
+plot_5
+```
+
+The same goes with the S^G50^ group, with the increase in the number of proposals submitted each year, there is a decrease in the success rate.\
+
+**Funding Agencies for (S^G30^)**\
+```{r echo=FALSE,warning = FALSE}
+##Plot_2##
+#Funding Agency - G30
+FA_g30<-distinct(G_30,FA,.keep_all=TRUE)
+plot_2<-ggplot()+
+  geom_linerange(data=FA_g30, mapping=aes(x=FA, ymin=Lower_limit, ymax=Upper_limit),colour = c("grey","black","black","orange","black","orange"),size=1) + 
+  geom_point(data=FA_g30, mapping=aes(x=FA, y=Prediction), size=4,  colour = c("grey","black","black","orange","black","orange")) + 
+  labs(x="" , y="SG30",title = "Funding Agency") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("NSF","NIH","DoE","DoD","NASA","Other"))
+plot_2
+```
+
+The Respondents belonging to the Agencies NSF,NIH,DoE,NASA are almost above 50%, have a quite decent probability to belong to the group S~1~^G30^,where are the Groups, DoD and Others have 26.4% and 28.9% higher probability to belong to the S~1~^G30^.\
+
+**Funding Agencies for (S^G50^)**\
+```{r echo=FALSE,warning = FALSE}
+##Plot_2##
+#Funding Agency - G30
+FA_g50<-distinct(G_50,FA,.keep_all=TRUE)
+plot_6<-ggplot()+
+  geom_linerange(data=FA_g50, mapping=aes(x=FA, ymin=Lower_Limit, ymax=Upper_Limit),colour = c("grey","black","black","lightskyblue1","black","orange"),size=1) + 
+  geom_point(data=FA_g50, mapping=aes(x=FA, y=Prediction), size=4,  colour = c("grey","black","black","lightskyblue1","black","orange")) + 
+  labs(x="" , y="SG50",title = "Funding Agency") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("NSF","NIH","DoE","DoD","NASA","Other"))
+plot_6
+```
+Even for the SG50 group, The funding Agencies corresponding to the success rate of the Grantsmanship is almost similar to the group S~1~^G30^, the groups DoD and Other has a 26.4% and 31.0%  higher than the other groups to belong to to the S~1~^G50^ group.\
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+plot_bf3<-ggplot(G_30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+labs(title = "Break Frequency")
+```
+
+
+**Break Frequency for S^G50^**\
+
+
+```{r echo=FALSE,warning = FALSE}
+summary_BF_50 <- distinct(G_50,BR,.keep_all=TRUE)
+summary_BF_50$BR_new<-with(summary_BF_50,ifelse(summary_BF_50$BR=="Every1or2h","BF1",                                       ifelse(summary_BF_50$BR=="Every3or4h","BF2","NA")))
+PLot_7<-
+  ggplot()+
+  geom_linerange(data=summary_BF_50, mapping=aes(x=BR_new, ymin=Lower_Limit, ymax=Upper_Limit),colour = c("grey","lightskyblue1"),size=1) + 
+  geom_point(data=summary_BF_50, mapping=aes(x=BR_new, y=Prediction), size=4,  colour = c("grey","lightskyblue1")) + 
+  labs(x="" , y="SG50",title = "Break Frequency") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("BF1","BF2"))
+PLot_7
+```
+The Faculty, who doesn't take a lot of breaks belong to BF2 Category have the higher chances(81%) changes of belonging to the S~1~^G50^ group hence a successful grantsmanship.\
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+plot_pr4<-ggplot(G_30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+labs(title = "Pilot Research")
+
+```
+
+
+```{r echo=FALSE,warning = FALSE}
+##PLot-8##
+#Pilot Research - G50
+PR_g50<-distinct(G_50,AR,.keep_all=TRUE)
+plot_8<-ggplot() +
+  geom_linerange(data=PR_g50, mapping=aes(x=AR, ymin=Lower_Limit, ymax=Upper_Limit),colour = c("grey","lightskyblue1","orange","lightskyblue1","lightskyblue1"),size=1) + 
+  geom_point(data=PR_g50, mapping=aes(x=AR, y=Prediction), size=4,  colour = c("grey","lightskyblue1","orange","lightskyblue1","lightskyblue1")) + 
+  labs(x="" , y="SG50",title = "Pilot Research") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("PR1","PR2","PR3","PR4","PR5"))
+plot_8
+```
+PR1(less than 1 month),PR2(1-3 months),PR3(3-6 months),PR4(6-12 months), and PR5(more than 12 months). The less the amount of time spent on the Pilot Research by the faculty the more Successful grantsmanship is received.PR2, PR4, and PR5 researchers, in particular, had a 31.4 percent, 28.3 percent, and 34.1 percent reduced chance of belonging to S~1~^G50^, respectively.The group PR3 is the worst case scenario, which has a 36.4 percent decreased chance of belonging to S~1~^G50^.\
+**h-index for S^G30^**\
+
+```{r echo=FALSE,warning = FALSE}
+summary_h_30<-distinct(G_30,H,.keep_all=TRUE)
+plot_S9<- ggplot(data = summary_h_30, aes(x = H,y=prediction))+scale_x_continuous(limits = c(0,200))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="lightskyblue1" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  geom_vline(xintercept =29.56824 , linetype="dotted", 
+             color = "grey", size=1)+
+  labs(x="" , y="SG30",title = "h-index")+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+
+plot_S9
+```
+
+
+The Academic fame expressed by h-index plays a major role in the success of a grantsmanship.The vertical dotted line represents the mean. the Faculty with h-index one standard deviation above the mean has a 7.9% higher chances of belonging to the S~1~^G30^ group.\
+**h-index for S^G50^**\
+
+```{r echo=FALSE,warning = FALSE}
+summary_h_50<-distinct(G_50,H,.keep_all=TRUE)
+plot_S14<- ggplot(data = summary_h_50, aes(x = H,y=prediction))+scale_x_continuous(limits = c(0,200))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_Limit, ymax = Upper_Limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="yellow" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="SG50",title = "h-index")+
+  geom_vline(xintercept =29.56824 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_S14
+```
+
+Similar to the Group S^G30^, The faculty with a h-index one Standard deviation above the mean has a  10.2% higher changes of belonging to the group S~1~^G50^.\
+
+**Deadline Stress for S^G30^**\
+```{r echo=FALSE,warning = FALSE}
+##plot_10##
+#Deadline Stress - G30
+DS_g30<-distinct(G_30,DS,.keep_all=TRUE)
+plot_s10<-ggplot() +
+  geom_linerange(data=DS_g30, mapping=aes(x=DS, ymin=Lower_limit, ymax=Upper_limit),colour = c("grey","orange")) + 
+  geom_point(data=DS_g30, mapping=aes(x=DS, y=Prediction), size=4,  colour = c("grey","orange")) + 
+  labs(x="" , y="SG30",title = "Deadline stress") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("DS1","DS2")) 
+plot_s10
+```
+
+DS2 corresponds to the group with faculty who experience higher stress in deadlines, where DS1 contains the faculty who experience less stress compared to DS1.We can clearly see from the graph that, The Faculty which experiences higher stress in deadlines has  17.5% less probability of belonging to a the group S~1~^G30^.\
+
+**Trait Anxiety for group S^G30^**\
+
+```{r echo=FALSE,warning = FALSE}
+
+summary_S_TA<-distinct(G_30,TA,.keep_all=TRUE)
+plot_S11<- ggplot(data = summary_S_TA, aes(x = TA,y=prediction))+scale_x_continuous(limits = c(20,70))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="blue" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="SG30",title = "Trait Anxiety")+
+  geom_vline(xintercept =41.33747 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14))
+
+plot_S11
+
+```
+trait anxiety scores, obtained via STAI , For a faculty with STAI score one standard deviation above the mean, the probability of belonging to S~1~^G30^ decreases by 7.8%.\
+
+
+**Extraversion for group S^G50^**\
+```{r echo=FALSE,warning = FALSE}
+summary_EX_50<-distinct(G_50,EX,.keep_all=TRUE)
+plot_S17<- ggplot(data = summary_EX_50, aes(x = EX,y=prediction))+scale_x_continuous(limits = c(2,10))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_Limit, ymax = Upper_Limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="orange" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="SG50",title = "Extraversion")+
+  geom_vline(xintercept =5.957816, linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_S17
+```
+
+Extraversion scores are obtained via Big-five Questionnaire, for researchers who's score falls in one standard deviation above the mean,the probability of them belonging to S~1~^G50^ group decreases by 13.1%.\
+
+**Avoidance Coping**\
+
+```{r echo=FALSE,warning = FALSE}
+summary_AV_50<-distinct(G_50,AV,.keep_all=TRUE)
+plot_S18<- ggplot(data = summary_AV_50, aes(x = AV,y=prediction))+scale_x_continuous(limits = c(10,30))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_Limit, ymax = Upper_Limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="blue" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="SG50",title = "Avoidance coping")+
+  geom_vline(xintercept =18.81638, linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_S18
+
+```
+
+Avoidance coping have a very positive impact on the Probability of a faculty belonging to the S~1~^G50^ class. The faculty with score one standard deviation above the mean have a 9.1% higher probability of belonging to the group S~1~^G50^.\
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+plot_ev<-ggplot(DS_g30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+labs(title = "Extraversion")
+
+plot_ac<-ggplot(DS_g30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+labs(title = "Avoidance Coping")
+plot_ds2<-ggplot(DS_g30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+labs(title = "Deadline Stress")
+
+plot_TA<-ggplot(DS_g30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+labs(title = "Trait Anxiety")
+
+
+```
+
+```{r echo=FALSE,fig.width=15,fig.height=12}
+f=ggarrange(plot_1,plot_2,plot_bf3,plot_pr4,plot_5,plot_6,PLot_7,plot_8,
+               ncol=4,
+               nrow=2)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE,fig.width=7,fig.height=12}
+
+b=ggarrange(plot_S9,plot_S14,ncol=1,nrow=2)
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE,fig.width=15,fig.height=12}
+
+
+c=ggarrange(plot_s10,plot_S11,plot_ev,plot_ac,plot_ds2,plot_TA,plot_S17,plot_S18,ncol=4,nrow=2)
+
+
+
+```
+
+```{r echo=FALSE, fig.height=12, fig.width=15, message=FALSE, warning=FALSE}
+
+
+
+bottom_row <- plot_grid(b, c, labels = c('B', 'C'), label_size = 12,rel_widths=c(1,2))+theme(plot.background = element_rect(color = "black"))
+
+
+plot_grid(f, bottom_row, labels = c('A', ''), label_size = 12, ncol = 1)
+
+
+```
+
+**Figure-3**\
+
+**Well-Funded Research Operations (S^\$75^):**This is the baseline Configuration,it features a more permissive definition of Success in Grantsmanship.i.e, 75%. Respondents who estimates a success rate greater 75% belongs to S~1~^\$75^ group and the Respondents who estimates a success rate below  75% belongs to S~0~^\$75^ group.\ 
+
+
+
+**Fully-Funded Research Operations(s^\$\$^) ** This is the ultimate Configuration, it features a more strict definition of Success,i.e, 100%.Respondents who estimates a success rate greater 100% belongs to **S~1~^\$\$^** group and the Respondents who estimates a success rate below 100% belongs to **S~0~^\$\$^** group.\
+
+**Funding Agencies for S^\$75^**\
+
+```{r echo=FALSE,warning = FALSE}
+FA_75<-distinct(data_table75,FA,.keep_all=TRUE)
+plot_21<-ggplot()+
+  geom_linerange(data=FA_75, mapping=aes(x=FA, ymin=Lower_limit, ymax=Upper_limit),colour = c("grey","black","lightskyblue1","orange","black","black"),size=1) + 
+  geom_point(data=FA_75, mapping=aes(x=FA, y=Prediction), size=4,  colour = c("grey","black","lightskyblue1","orange","black","black")) + 
+  labs(x="" , y="S$75",title = "Funding Agency") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("NSF","NIH","DoE","DoD","NASA","Other"))
+plot_21
+```
+NIH,NASA and Other are almost closer to be able to belong to the group **S~1~^\$75^**, but Agencies DoE and DoD  have 28.0% and 28.6% higher probability to belong to **S~1~^\$75^**.\
+
+**Funding Agencies for s^\$\$^**\
+
+```{r echo=FALSE,warning = FALSE}
+summary_s_full_FA<-distinct(S_Full,FA,.keep_all=TRUE)
+plot_24<-ggplot() +
+  geom_linerange(data=summary_s_full_FA, mapping=aes(x=FA, ymin=Lower_limit, ymax=Upper_limit),colour = c("grey","black","black","red","black","black"),size=1) + 
+  geom_point(data=summary_s_full_FA, mapping=aes(x=FA, y=Prediction), size=4,  colour = c("grey","black","black","red","black","black")) +
+  labs(x="" , y="S$$",title = "Funding Agency") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("NSF","NIH","DoE","DoD","NASA","Other")) 
+plot_24
+```
+The Agency DoD had 33.9% higher probability of belonging to the most Successful Group compared to the others.\
+
+**Time of Submission for S^\$75^**\
+
+```{r echo=FALSE,warning = FALSE}
+TS_75<-distinct(data_table75,T,.keep_all=TRUE)
+plot_22<-ggplot() +
+  geom_linerange(data=TS_75, mapping=aes(x=T, ymin=Lower_limit, ymax=Upper_limit),colour = c("grey","lightskyblue1"),size=1) + 
+  geom_point(data=TS_75, mapping=aes(x=T, y=Prediction), size=4,  colour = c("grey","lightskyblue1")) + 
+  labs(x="" , y="S$75",title = "Time of Submission") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("TS1","TS2")) 
+plot_22
+```
+
+TS1(submission the deadline day) and TS2(submission earlier than the deadline day).\
+
+The faculty who submits the proposal earlier than the deadline has less probability of a successful grantsmanship. which might implies that taking enough time to prepare a quality proposal is important for a success.\
+
+**Typical week Research for S^\$75^**\
+
+```{r echo=FALSE,warning = FALSE}
+summary_TWR <-distinct(data_table75,TWR,.keep_all=TRUE)
+plot_23<-   ggplot(data = summary_TWR,aes(x = TWR,y=prediction))+scale_x_continuous(limits = c(0,100))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="orange" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="S$75",title = "Typical Week Research")+
+  geom_vline(xintercept =42.08437 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_23
+```
+
+The amount of time devoted for the research for a week has a very positive impact on belonging to the most successful class.for a faculty,if the amount of time spend on the research is one  standard deviations above the mean , the probability of belonging to a successful class raises by 8.3%.\
+
+**Typical week Research for S^\$\$^**\
+
+
+```{r echo=FALSE,warning = FALSE}
+Summary_TWR_F<-distinct(S_Full,TWR,.keep_all=TRUE)
+plot_26<-   ggplot(data = Summary_TWR_F, aes(x = TWR,y=prediction))+scale_x_continuous(limits = c(0,100))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="red" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="S$$",title = "Typical Week Research")+
+  geom_vline(xintercept =42.08437 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_26
+```
+TWR for **S^\$\$^** is similar to above, the faculty with TWR one standard deviation above the mean is 10.4% higher probable of belonging to the **S~1~^\$\$^**\
+
+
+**h-index for S^\$75^**\
+
+```{r echo=FALSE,warning = FALSE}
+summary_h <-distinct(data_table75,H,.keep_all=TRUE)
+
+plot_27<- ggplot(data = summary_h, aes(x = H,y=prediction))+scale_x_continuous(limits = c(0,100))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="blue" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="S$75",title = "h-index")+
+  geom_vline(xintercept =29.56824 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_27
+```
+h-index here in **S^\$75^** plays a positive role in the Successful Grantsmanship. if the faculty h-index is one standard deviation above the mean, then he/she is more probable to be able to be a member of **S~1~^\$75^** group.\
+
+**Research Style for S^\$75^**\
+```{r echo=FALSE,warning = FALSE}
+RS_75<-distinct(data_table75,RS,.keep_all=TRUE)
+RS_75$Score<-0
+RS_75$Score<-ifelse(RS_75$RS=="HandsOff",1,2)
+plot_28<-ggplot()+
+  geom_linerange(data=RS_75, mapping=aes(x=Score, ymin=Lower_limit, ymax=Upper_limit),colour = c("grey","lightskyblue1"),size=1) + 
+  geom_point(data=RS_75, mapping=aes(x=Score, y=Prediction), size=4,  colour = c("grey","lightskyblue1")) + 
+  labs(x="" , y="",title = "Research Style") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("RS1","RS2")) 
+plot_28
+```
+Any Faculty who adopts a Hands-on research style(RS2) has a 10.8% lower probability of belonging to a **S~1~^\$75^** compared to a Hands-off research style(RS1).\
+
+
+**Openness for S^\$75^**\
+
+```{r echo=FALSE,warning = FALSE}
+summary_o<-distinct(data_table75,OP,.keep_all=TRUE)
+plot_29<- ggplot(data = summary_o, aes(x = OP,y=prediction))+scale_x_continuous(limits = c(2,10))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="green" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="",title = "Openness")+
+  geom_vline(xintercept =7.513648 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_29
+```
+As we can see above, an Openness Score has a negative impact on a faculty able to be a part of a most successful group. if a Faculties Openness score is one standard deviation above the mean then the faculty is 5.3% less probable to belong to a **S~1~^\$75^** group.\
+
+
+**Openness for s^\$\$^**\
+```{r echo=FALSE,warning = FALSE}
+summary_o_F<-distinct(S_Full,OP,.keep_all=TRUE)
+plot_212<- ggplot(data = summary_o_F, aes(x = OP,y=prediction))+scale_x_continuous(limits = c(2,10))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="green" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="",title = "Openness")+
+  geom_vline(xintercept =7.513648 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_212
+```
+Just like in the case of group S^\$75^,if the faulty openness score is one Standard deviations above the mean, then he/she is 3.4% less probable of belonging to the the most successful group.\
+
+
+```{r include=FALSE}
+
+plot_h<-ggplot(DS_g30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )+
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  labs(y="S$$")
+  
+plot_blank<-ggplot(DS_g30)+
+theme(panel.border = element_rect(colour = "black",fill ="white",size=1))+
+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+  
+```
+
+```{r echo=FALSE, fig.height=12, fig.width=15, message=FALSE, warning=FALSE}
+
+a1=ggarrange(plot_21,plot_22,plot_23,plot_24,plot_blank,plot_26,
+               ncol=3,
+               nrow=2)
+
+
+```
+
+```{r echo=FALSE, fig.height=12, fig.width=10, message=FALSE, warning=FALSE}
+
+
+b1=ggarrange(plot_27,plot_28,plot_h,plot_blank,
+               ncol=2,
+               nrow=2)
+
+```
+
+```{r echo=FALSE, fig.height=12, fig.width=5, message=FALSE, warning=FALSE}
+c1=ggarrange(plot_29,plot_212,
+               ncol=1,
+               nrow=2)
+
+
+
+```
+
+```{r echo=FALSE, fig.height=12, fig.width=15, message=FALSE, warning=FALSE}
+bottom_row <- plot_grid(b1, c1, labels = c('B', 'C'), label_size = 12)+theme(plot.background = element_rect(color = "black"))
+
+
+
+plot_grid(a1, bottom_row, labels = c('A', ''), label_size = 12, ncol = 1)
+```
+
+
+
+**Figure-4**\
+
+**Combined Grantsmanship and Grant Funding Record Analysis**\
+
+The most Successful class(**S~1~^S50\$\$^**) includes the faculty with grantsmanship ratio above 50% and fully granted funds. the Least Successful class (**S~0~^S50\$\$^**) includes the rest of the sample.\
+
+
+
+**Number of Proposals**\
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+NP_Sg50<-distinct(G_50_ff,NP,.keep_all=TRUE)
+plot_1_Sg50<-ggplot() +
+  geom_linerange(data=NP_Sg50, mapping=aes(x=NP, ymin=Lower_limit, ymax=Upper_limit),colour = c("grey","orange","orange"),size=1) + 
+  geom_point(data=NP_Sg50, mapping=aes(x=NP, y=Prediction), size=4,  colour = c("grey","orange","orange")) + 
+  ylab(bquote(Y-Axis^superscript))+
+  labs(x="" , y="S50$$",title = "Number of Proposals") + 
+  scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 14) )+ 
+  scale_x_discrete(limits=c("NP1","NP2","NP3")) 
+
+plot_1_Sg50
+
+```
+Just as in the case of S^G30^ and S^G50^, more the number of proposals per year, less likely is that faculties probability to belong in the most Successful Group.\
+
+
+**Typical Week Research**\
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+summary_GFF_TWR<-distinct(G_50_ff,TWR,.keep_all=TRUE)
+plot_GFF_2<- ggplot(data = summary_GFF_TWR, aes(x = TWR,y=prediction))+scale_x_continuous(limits = c(20,70))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="blue" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+theme(plot.title = element_text(hjust = 0.5, size = 14) )+ scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="SG50$$",title = "Typical Week Research")+
+  geom_vline(xintercept =42.08437 , linetype="dotted", 
+             color = "Orange", size=1)
+
+plot_GFF_2
+
+```
+Faculty with TWR greater than one standard deviation of mean has 7.4% higher probability of
+belonging to the most Successful group.\
+
+**Extraversion**\
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary_GFF_EX<-distinct(G_50_ff,EX,.keep_all=TRUE)
+plot_GFF_3<- ggplot(data = summary_GFF_EX, aes(x = EX,y=Prediction))+scale_x_continuous(limits = c(2,10))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="blue" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="SG50$$",title = "Extraversion")+
+  geom_vline(xintercept =5.957816 , linetype="dotted", 
+             color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_GFF_3
+```
+Just as above groups, Extraversion has negative impact on the Probability of a faculties ability of be a member of a group. Faculty with Extraversion score one Standard deviation above the mean has 4.3% less Probability of belonging to Most Successful Class.\
+
+**Agreeableness**\
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary_GFF_AGR<-distinct(G_50_ff,AGR,.keep_all=TRUE)
+plot_GFF_4<- ggplot(data = summary_GFF_AGR, aes(x = AGR,y=Prediction))+scale_x_continuous(limits = c(4,10))+
+  geom_smooth(aes( y = Prediction, ymin = Lower_limit, ymax = Upper_limit), method = "lm" ,formula =  y ~ ns(x, 2) ,color="blue" ,stat="identity", fill="gray", alpha=0.2) + 
+  theme_classic()+scale_y_continuous(breaks = seq(0, 1, .25) , labels = percent , limits = c(0, 1))+labs(x="" , y="SG50$$",title = "Agreeableness")+
+  geom_vline(xintercept =7.528536 , linetype="dotted", color = "grey", size=1)+theme(plot.title = element_text(hjust = 0.5, size = 14) )
+plot_GFF_4
+```
+
+Agreeableness score has a positive impact on the Faculties membership for a most successful class. Faculty with score one Standard deviation above the mean has 5.6% probability of belonging to the most successful class.\
+
+
+
+```{r echo=FALSE, fig.height=6, fig.width=15, message=FALSE, warning=FALSE}
+
+test6=ggarrange(plot_1_Sg50,plot_GFF_2,plot_GFF_3,plot_GFF_4,
+               ncol=4,
+               nrow=1)
+test6
+
+
+```
